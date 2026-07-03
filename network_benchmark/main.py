@@ -4,6 +4,7 @@ import argparse
 import logging
 from pathlib import Path
 from typing import Optional
+from datetime import datetime
 
 from benchmark import run_benchmark
 from config import (
@@ -76,7 +77,16 @@ def main() -> None:
 	args = parser.parse_args()
 
 	ensure_directories()
-	logger = setup_logging(DEFAULT_LOG_PATH)
+	run_name = datetime.now().strftime("run_%Y%m%d_%H%M%S")
+	run_dir = RESULTS_DIR / run_name
+	run_dir.mkdir(parents=True, exist_ok=True)
+
+	log_path = run_dir / "benchmark.log"
+	raw_results_path = run_dir / "raw_results.csv"
+	summary_csv_path = run_dir / "summary.csv"
+	summary_text_path = run_dir / "summary.txt"
+
+	logger = setup_logging(log_path)
 
 	dataset_path = args.dataset.expanduser().resolve() if not args.dataset.is_absolute() else args.dataset
 	logger.info("Using dataset source: %s", dataset_path)
@@ -100,15 +110,16 @@ def main() -> None:
 	)
 
 	summary = build_summary(raw_results)
-	raw_results.to_csv(DEFAULT_RAW_RESULTS_PATH, index=False)
-	summary.to_csv(DEFAULT_SUMMARY_CSV_PATH, index=False)
+	raw_results.to_csv(raw_results_path, index=False)
+	summary.to_csv(summary_csv_path, index=False)
 
 	summary_text = format_summary_report(raw_results)
-	DEFAULT_SUMMARY_TEXT_PATH.write_text(summary_text, encoding="utf-8")
+	summary_text_path.write_text(summary_text, encoding="utf-8")
 
-	logger.info("Raw results saved to %s", DEFAULT_RAW_RESULTS_PATH)
-	logger.info("Summary CSV saved to %s", DEFAULT_SUMMARY_CSV_PATH)
-	logger.info("Summary text saved to %s", DEFAULT_SUMMARY_TEXT_PATH)
+	logger.info("Run directory: %s", run_dir)
+	logger.info("Raw results saved to %s", raw_results_path)
+	logger.info("Summary CSV saved to %s", summary_csv_path)
+	logger.info("Summary text saved to %s", summary_text_path)
 
 
 if __name__ == "__main__":
