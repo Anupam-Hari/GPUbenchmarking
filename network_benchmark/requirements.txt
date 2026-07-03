@@ -1,0 +1,5 @@
+pandas
+numpy
+scikit-learn
+cudf-cu12
+cuml-cu12S
