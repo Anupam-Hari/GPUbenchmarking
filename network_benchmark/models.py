@@ -59,7 +59,7 @@ class RandomForestBenchmarkModel:
 		if isinstance(features, cudf.DataFrame):
 			return features
 		if isinstance(features, pd.DataFrame):
-			return cudf.DataFrame.from_pandas(features)
+			return cudf.from_pandas(features)
 		return cudf.DataFrame(features)
 
 	def _prepare_gpu_target(self, target: Any) -> Any:
