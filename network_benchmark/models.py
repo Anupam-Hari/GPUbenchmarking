@@ -89,11 +89,15 @@ class RandomForestBenchmarkModel:
 	def fit(self, features: Any, target: Any) -> None:
 		self.estimator.fit(features, target)
 
-	def predict(self, features: Any) -> np.ndarray:
-		predictions = self.estimator.predict(features)
+	def predict_raw(self, features):
+		return self.estimator.predict(features)
+
+	def postprocess_predictions(self, predictions):
 		predictions_array = _to_numpy(predictions)
 		if self.label_encoder is not None:
-			predictions_array = self.label_encoder.inverse_transform(predictions_array.astype(int, copy=False))
+			predictions_array = self.label_encoder.inverse_transform(
+				predictions_array.astype(int, copy=False)
+			)
 		return np.asarray(predictions_array)
 
 

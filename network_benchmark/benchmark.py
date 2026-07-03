@@ -76,9 +76,10 @@ def run_benchmark(
 
                         prepared_test_features = model.prepare_predict_data(split.X_test)
                         predict_start = perf_counter()
-                        predictions = model.predict(prepared_test_features)
+                        raw_predictions = model.predict_raw(prepared_test_features)
                         predict_time = perf_counter() - predict_start
 
+                        predictions = model.postprocess_predictions(raw_predictions)
                         accuracy = accuracy_score(split.y_test, predictions)
                         total_time = train_time + predict_time
 
