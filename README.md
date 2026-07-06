@@ -43,14 +43,16 @@ For GPU runs, install the RAPIDS stack on the GPU host in an environment that ma
 Place the raw dataset at:
 
 ```text
-datasets/network.csv
+datasets/
 ```
+Multiple datasets can be placed here, provided they're of the same format.
 
 The preprocessing step will create:
 
 ```text
 processed_data/processed_network_traffic.csv
 ```
+In case of multiple datasets, all of them will be concatenated and processed.
 
 ## CLI Usage
 
