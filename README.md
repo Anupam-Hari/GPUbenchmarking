@@ -1,6 +1,7 @@
 # Network Benchmark
 
-Reusable benchmarking framework for comparing `sklearn` RandomForestClassifier against `cuML` RandomForestClassifier on the same processed network traffic dataset.
+Reusable benchmarking framework for comparing `sklearn` ML models against `cuML` ML models on the same processed network traffic dataset.
+The models currently incorporated are RandomForestClassifier, KMeans and KNeighboursClassifier
 
 ## What This Project Does
 
