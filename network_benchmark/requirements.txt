@@ -1,5 +1,6 @@
 pandas
 numpy
+plotly
 scikit-learn
 cudf-cu12
 cuml-cu12
