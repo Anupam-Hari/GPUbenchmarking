@@ -94,7 +94,7 @@ class BenchmarkModel:
             return features
 
         if isinstance(features, pd.DataFrame):
-            return cudf.DataFrame.from_pandas(features)
+            return cudf.from_pandas(features)
 
         return cudf.DataFrame(features)
 
