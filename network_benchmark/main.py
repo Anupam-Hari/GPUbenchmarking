@@ -8,23 +8,17 @@ from datetime import datetime
 
 from benchmark import run_benchmark
 from config import (
-	BACKENDS,
-	DATASETS_DIR,
-	DEFAULT_DATASET_PATH,
-	DEFAULT_LOG_PATH,
-	DEFAULT_PROCESSED_DATA_PATH,
-	DEFAULT_RAW_RESULTS_PATH,
-	DEFAULT_SUMMARY_CSV_PATH,
-	DEFAULT_SUMMARY_TEXT_PATH,
-	N_ESTIMATORS,
-	N_REPEATS,
-	PROCESSED_DATA_DIR,
-	RANDOM_STATE,
-	RESULTS_CSV_DIR,
-	RESULTS_DIR,
-	RESULTS_LOGS_DIR,
-	SAMPLE_SIZES,
-	TREE_DEPTHS,
+    BACKENDS,
+    DATASETS_DIR,
+    DEFAULT_DATASET_PATH,
+    DEFAULT_PROCESSED_DATA_PATH,
+    MODEL_PARAMETERS,
+    SUPPORTED_MODELS,
+    N_REPEATS,
+    PROCESSED_DATA_DIR,
+    RANDOM_STATE,
+    RESULTS_DIR,
+    SAMPLE_SIZES,
 )
 from metrics import build_summary, format_summary_report
 from prepare_data import prepare_data
@@ -37,11 +31,10 @@ def parse_optional_int(value: str) -> Optional[int]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-	parser = argparse.ArgumentParser(description="Benchmark sklearn and cuML RandomForestClassifier backends.")
+	parser = argparse.ArgumentParser(description="Benchmark sklearn and cuML machine learning models.")
 	parser.add_argument("--backend", choices=["cpu", "gpu", "both"], default="both")
-	parser.add_argument("--depths", nargs="+", type=parse_optional_int, default=list(TREE_DEPTHS))
-	parser.add_argument("--trees", nargs="+", type=int, default=list(N_ESTIMATORS))
-	parser.add_argument("--samples", nargs="+", type=parse_optional_int, default=list(SAMPLE_SIZES))
+	parser.add_argument("--model", choices=SUPPORTED_MODELS, default="random_forest")
+	parser.add_argument("--samples", nargs="+", type=parse_optional_int, default=None)
 	parser.add_argument("--repeats", type=int, default=N_REPEATS)
 	parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET_PATH)
 	parser.add_argument("--random-state", type=int, default=RANDOM_STATE)
@@ -68,13 +61,14 @@ def setup_logging(log_path: Path) -> logging.Logger:
 
 
 def ensure_directories() -> None:
-	for path in [DATASETS_DIR, PROCESSED_DATA_DIR, RESULTS_DIR, RESULTS_CSV_DIR, RESULTS_LOGS_DIR]:
+	for path in [DATASETS_DIR, PROCESSED_DATA_DIR, RESULTS_DIR]:
 		path.mkdir(parents=True, exist_ok=True)
 
 
 def main() -> None:
 	parser = build_parser()
 	args = parser.parse_args()
+	model_parameters = MODEL_PARAMETERS[args.model]
 
 	ensure_directories()
 	run_name = datetime.now().strftime("run_%Y%m%d_%H%M%S")
@@ -98,12 +92,14 @@ def main() -> None:
 		logger=logger,
 	)
 
+	logger.info("Selected model: %s", args.model)
+
 	raw_results = run_benchmark(
+		model_name=args.model,
 		backend=args.backend,
 		processed_csv_path=processed_csv_path,
 		sample_sizes=args.samples,
-		max_depths=args.depths,
-		n_estimators_list=args.trees,
+		model_parameters=model_parameters,
 		n_repeats=args.repeats,
 		random_state=args.random_state,
 		logger=logger,

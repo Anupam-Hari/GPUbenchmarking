@@ -38,6 +38,7 @@ network_benchmark/results/
 network_benchmark/datasets/
 analysis/*
 original_notebook/*
+gpuresults/*
 
 # Logs
 *.log

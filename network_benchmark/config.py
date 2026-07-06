@@ -15,8 +15,32 @@ DEFAULT_SUMMARY_TEXT_PATH = RESULTS_LOGS_DIR / "summary.txt"
 DEFAULT_LOG_PATH = RESULTS_LOGS_DIR / "benchmark.log"
 
 BACKENDS = ("cpu", "gpu")
-TREE_DEPTHS = (5, 10, 20, 40, None)
-N_ESTIMATORS = (50, 100, 200, 500)
-SAMPLE_SIZES = (10000, 25000, 50000, 100000)
+
+SUPPORTED_MODELS = (
+    "random_forest",
+    "knn",
+    "kmeans",
+)
+
+MODEL_PARAMETERS = {
+    "random_forest": {
+        "n_estimators": (50, 100, 200, 500),
+        "max_depth": (5, 10, 20, 40, None),
+    },
+    "knn": {
+        "n_neighbors": (3, 5, 10, 20, 50),
+    },
+    "kmeans": {
+        "n_clusters": (2, 4, 8, 16, 32),
+    },
+}
+
+SAMPLE_SIZES = (
+    10000,
+    25000,
+    50000,
+    100000,
+)
+
 N_REPEATS = 5
 RANDOM_STATE = 42
