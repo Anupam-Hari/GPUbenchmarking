@@ -58,6 +58,7 @@ Run the benchmark from the project root:
 
 ```bash
 python main.py \
+  --models random_forest \
   --backend both \
   --depths 5 10 20 None \
   --trees 50 100 200 \
@@ -68,6 +69,7 @@ python main.py \
 
 Supported arguments:
 
+- `--models knn|kmeans|random_forest`
 - `--backend cpu|gpu|both`
 - `--depths 5 10 20 40 None`
 - `--trees 50 100 200 500`

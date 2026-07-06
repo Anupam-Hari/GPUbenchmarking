@@ -24,8 +24,8 @@ SUPPORTED_MODELS = (
 
 MODEL_PARAMETERS = {
     "random_forest": {
-        "n_estimators": (50, 100, 200, 500),
-        "max_depth": (5, 10, 20, 40, None),
+        "n_estimators": (100, 200, 500),
+        "max_depth": (5, 10, 20, None),
     },
     "knn": {
         "n_neighbors": (3, 5, 10, 20, 50),

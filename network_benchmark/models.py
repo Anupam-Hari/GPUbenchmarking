@@ -42,13 +42,14 @@ class BenchmarkModel:
                 )
 
         # ---------------- KNN ----------------
-
+        
         elif self.model_name == "knn":
 
             if self.backend == "cpu":
                 from sklearn.neighbors import KNeighborsClassifier
 
                 return KNeighborsClassifier(
+                    n_jobs=-1,
                     **self.parameters,
                 )
 
