@@ -33,7 +33,7 @@ def parse_optional_int(value: str) -> Optional[int]:
 def build_parser() -> argparse.ArgumentParser:
 	parser = argparse.ArgumentParser(description="Benchmark sklearn and cuML machine learning models.")
 	parser.add_argument("--backend", choices=["cpu", "gpu", "both"], default="both")
-	parser.add_argument("--model", choices=SUPPORTED_MODELS, default="random_forest")
+	parser.add_argument("--model", nargs="+", choices=SUPPORTED_MODELS, default=SUPPORTED_MODELS)
 	parser.add_argument("--samples", nargs="+", type=parse_optional_int, default=None)
 	parser.add_argument("--repeats", type=int, default=N_REPEATS)
 	parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET_PATH)
