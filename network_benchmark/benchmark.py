@@ -75,6 +75,16 @@ def run_benchmark(
                 }
             )
 
+    elif model_name == "dbscan":
+        for eps in model_parameters["eps"]:
+            for min_samples in model_parameters["min_samples"]:
+                parameter_sets.append(
+                    {
+                        "eps": eps,
+                        "min_samples": min_samples,
+                    }
+                )
+
     else:
         raise ValueError(f"Unsupported model: {model_name}")
 
@@ -101,10 +111,13 @@ def run_benchmark(
                     model.fit(prepared_train_features, prepared_train_target)
                     train_time = perf_counter() - train_start
 
-                    prepared_test_features = model.prepare_predict_data(split.X_test)
-                    predict_start = perf_counter()
-                    model.predict_raw(prepared_test_features)
-                    predict_time = perf_counter() - predict_start
+                    if model_name == "dbscan":
+                        predict_time = 0.0
+                    else:
+                        prepared_test_features = model.prepare_predict_data(split.X_test)
+                        predict_start = perf_counter()
+                        model.predict_raw(prepared_test_features)
+                        predict_time = perf_counter() - predict_start
 
                     total_time = train_time + predict_time
 

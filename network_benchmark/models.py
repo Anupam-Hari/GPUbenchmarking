@@ -79,6 +79,21 @@ class BenchmarkModel:
                     random_state=self.random_state,
                     **self.parameters,
                 )
+        elif self.model_name == "dbscan":
+
+            if self.backend == "cpu":
+                from sklearn.cluster import DBSCAN
+
+                return DBSCAN(
+                    **self.parameters,
+                )
+
+            elif self.backend == "gpu":
+                from cuml.cluster import DBSCAN
+
+                return DBSCAN(
+                    **self.parameters,
+                )
 
         raise ValueError(
             f"Unsupported model/backend combination: "
@@ -113,7 +128,7 @@ class BenchmarkModel:
 
             features = self._prepare_gpu_features(features)
 
-            if self.model_name != "kmeans":
+            if self.model_name not in ("kmeans", "dbscan"):
                 target = cudf.Series(target)
 
         return features, target
@@ -130,9 +145,15 @@ class BenchmarkModel:
         features: Any,
         target: Any,
     ) -> None:
-        self.estimator.fit(features, target)
+        if self.model_name in {"kmeans", "dbscan"}:
+            self.estimator.fit(features)
+        else:
+            self.estimator.fit(features, target)
 
     def predict_raw(self, features: Any):
+
+        if self.model_name == "dbscan":
+            return self.estimator.labels_
 
         return self.estimator.predict(features)
 

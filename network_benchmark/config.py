@@ -20,6 +20,7 @@ SUPPORTED_MODELS = (
     "random_forest",
     "knn",
     "kmeans",
+    "dbscan",
 )
 
 MODEL_PARAMETERS = {
@@ -32,6 +33,10 @@ MODEL_PARAMETERS = {
     },
     "kmeans": {
         "n_clusters": (2, 4, 8, 16, 32),
+    },
+    "dbscan": {
+        "eps": [0.3, 0.5,],
+        "min_samples": [5, 10,],
     },
 }
 
