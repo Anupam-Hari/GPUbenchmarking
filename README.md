@@ -90,17 +90,8 @@ The benchmark writes:
 - `results/logs/summary.txt` - readable report.
 - `results/logs/benchmark.log` - execution log.
 
-## Remote GPU Workflow
-
-1. Copy the repository to the GPU machine.
-2. Put the raw dataset in `datasets/network.csv`.
-3. Create and activate a Python environment on the GPU host.
-4. Install `requirements.txt` plus the matching RAPIDS packages for your CUDA version.
-5. Run the CLI with `--backend gpu` or `--backend both`.
-6. Copy the contents of `results/csv/` and `results/logs/` back to your host machine for review.
-
 ## Notes
 
 - Preprocessing is executed once per processed dataset and is not included in benchmark timing.
-- Timing uses `time.perf_counter()`.
+- Timing uses `time.perf_counter()` and returns the time in seconds.
 - GPU-specific `cudf` and `cuML` handling stays inside `models.py`.
