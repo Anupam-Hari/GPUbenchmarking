@@ -71,7 +71,7 @@ def main() -> None:
 	model_parameters = MODEL_PARAMETERS[args.model]
 
 	ensure_directories()
-	run_name = datetime.now().strftime("run_%Y%m%d_%H%M%S")
+	run_name = f"{args.model}_{datetime.now().strftime('%d%m%Y_%H%M%S')}"
 	run_dir = RESULTS_DIR / run_name
 	run_dir.mkdir(parents=True, exist_ok=True)
 
