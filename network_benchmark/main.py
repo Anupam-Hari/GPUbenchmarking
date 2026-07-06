@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import pandas as pd
 import logging
 from pathlib import Path
 from typing import Optional
@@ -33,7 +34,7 @@ def parse_optional_int(value: str) -> Optional[int]:
 def build_parser() -> argparse.ArgumentParser:
 	parser = argparse.ArgumentParser(description="Benchmark sklearn and cuML machine learning models.")
 	parser.add_argument("--backend", choices=["cpu", "gpu", "both"], default="both")
-	parser.add_argument("--model", nargs="+", choices=SUPPORTED_MODELS, default=SUPPORTED_MODELS)
+	parser.add_argument("--model", nargs="+", choices=SUPPORTED_MODELS, default=SUPPORTED_MODELS,)
 	parser.add_argument("--samples", nargs="+", type=parse_optional_int, default=None)
 	parser.add_argument("--repeats", type=int, default=N_REPEATS)
 	parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET_PATH)
@@ -68,10 +69,9 @@ def ensure_directories() -> None:
 def main() -> None:
 	parser = build_parser()
 	args = parser.parse_args()
-	model_parameters = MODEL_PARAMETERS[args.model]
 
 	ensure_directories()
-	run_name = f"{args.model}_{datetime.now().strftime('%d%m%Y_%H%M%S')}"
+	run_name = f"{'_'.join(args.model)}_{datetime.now().strftime('%d%m%Y_%H%M%S')}"
 	run_dir = RESULTS_DIR / run_name
 	run_dir.mkdir(parents=True, exist_ok=True)
 
@@ -92,18 +92,27 @@ def main() -> None:
 		logger=logger,
 	)
 
-	logger.info("Selected model: %s", args.model)
+	all_results = []
 
-	raw_results = run_benchmark(
-		model_name=args.model,
-		backend=args.backend,
-		processed_csv_path=processed_csv_path,
-		sample_sizes=args.samples,
-		model_parameters=model_parameters,
-		n_repeats=args.repeats,
-		random_state=args.random_state,
-		logger=logger,
-	)
+	for model_name in args.model:
+		model_parameters = MODEL_PARAMETERS[model_name]
+
+		logger.info("Selected model: %s", model_name)
+
+		results = run_benchmark(
+			model_name=model_name,
+			backend=args.backend,
+			processed_csv_path=processed_csv_path,
+			sample_sizes=args.samples,
+			model_parameters=model_parameters,
+			n_repeats=args.repeats,
+			random_state=args.random_state,
+			logger=logger,
+		)
+
+		all_results.append(results)
+
+	raw_results = pd.concat(all_results, ignore_index=True)
 
 	summary = build_summary(raw_results)
 	raw_results.to_csv(raw_results_path, index=False)
