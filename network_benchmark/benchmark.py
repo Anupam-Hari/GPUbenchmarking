@@ -18,7 +18,7 @@ from cpu_monitor import ProcessCPUMonitor
 class BenchmarkResult:
     model: str
     backend: str
-    sample_size: Optional[int]
+    sample_size: Optional[int] 
     #parameters: dict
     repeat: int
     load_time: float
@@ -52,6 +52,7 @@ def run_benchmark(
         logger: logging.Logger | None = None,
     ) -> pd.DataFrame:
     logger = _get_logger(logger)
+    sample_sizes = SAMPLE_SIZES if sample_sizes is None else sample_sizes
     active_backends = _normalize_backends(backend)
 
     parameter_sets = []

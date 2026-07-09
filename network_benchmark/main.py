@@ -35,7 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
 	parser = argparse.ArgumentParser(description="Benchmark sklearn and cuML machine learning models.")
 	parser.add_argument("--backend", choices=["cpu", "gpu", "both"], default="both")
 	parser.add_argument("--model", nargs="+", choices=SUPPORTED_MODELS, default=SUPPORTED_MODELS,)
-	parser.add_argument("--samples", nargs="+", type=parse_optional_int, default=None)
+	parser.add_argument("--samples", nargs="+", type=parse_optional_int, default=SAMPLE_SIZES)
 	parser.add_argument("--repeats", type=int, default=N_REPEATS)
 	parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET_PATH)
 	parser.add_argument("--random-state", type=int, default=RANDOM_STATE)
