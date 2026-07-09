@@ -11,6 +11,7 @@ import pandas as pd
 from config import BACKENDS, RANDOM_STATE
 from models import get_model
 from split_data import split_data
+from cpu_monitor import ProcessCPUMonitor
 
 
 @dataclass(frozen=True)
@@ -18,11 +19,17 @@ class BenchmarkResult:
     model: str
     backend: str
     sample_size: Optional[int]
-    parameters: dict
+    #parameters: dict
     repeat: int
+    load_time: float
+    prepare_time: float
     train_time: float
     predict_time: float
     total_time: float
+    train_cpu_avg: float
+    train_cpu_peak: float
+    predict_cpu_avg: float
+    predict_cpu_peak: float
 
 def _get_logger(logger: logging.Logger | None) -> logging.Logger:
     return logger if logger is not None else logging.getLogger(__name__)
@@ -35,15 +42,15 @@ def _normalize_backends(backend: str) -> list[str]:
 
 
 def run_benchmark(
-    model_name: str,
-    backend: str,
-    processed_csv_path: Path | str,
-    sample_sizes: Sequence[Optional[int]],
-    model_parameters: dict,
-    n_repeats: int,
-    random_state: int = RANDOM_STATE,
-    logger: logging.Logger | None = None,
-) -> pd.DataFrame:
+        model_name: str,
+        backend: str,
+        processed_csv_path: Path | str,
+        sample_sizes: Sequence[Optional[int]],  
+        model_parameters: dict,
+        n_repeats: int,
+        random_state: int = RANDOM_STATE,
+        logger: logging.Logger | None = None,
+    ) -> pd.DataFrame:
     logger = _get_logger(logger)
     active_backends = _normalize_backends(backend)
 
@@ -107,29 +114,55 @@ def run_benchmark(
                     )
 
                     prepared_train_features, prepared_train_target = model.prepare_fit_data(split.X_train, split.y_train)
+
+                    monitor = ProcessCPUMonitor(interval=0.05)
+                    monitor.start()
+
                     train_start = perf_counter()
                     model.fit(prepared_train_features, prepared_train_target)
                     train_time = perf_counter() - train_start
 
+                    monitor.stop()
+                    train_cpu_avg = monitor.average
+                    train_cpu_peak = monitor.peak
+
                     if model_name == "dbscan":
                         predict_time = 0.0
+                        predict_time = 0.0
+                        predict_cpu_avg = 0.0
+                        predict_cpu_peak = 0.0
                     else:
                         prepared_test_features = model.prepare_predict_data(split.X_test)
+
+                        monitor.start()
                         predict_start = perf_counter()
                         model.predict_raw(prepared_test_features)
                         predict_time = perf_counter() - predict_start
 
-                    total_time = train_time + predict_time
+                        monitor.stop()
+                        predict_cpu_avg = monitor.average
+                        predict_cpu_peak = monitor.peak
 
                     result = BenchmarkResult(
                         model=model_name,
                         backend=current_backend,
                         sample_size=sample_size,
-                        parameters=parameters,
+                        #parameters=parameters,
                         repeat=repeat,
+                        load_time=split.load_time,
+                        prepare_time=split.prepare_time,
                         train_time=train_time,
                         predict_time=predict_time,
-                        total_time=total_time,
+                        total_time=(
+                            split.load_time
+                            + split.prepare_time
+                            + train_time
+                            + predict_time
+                        ),
+                        train_cpu_avg=train_cpu_avg,
+                        train_cpu_peak=train_cpu_peak,
+                        predict_cpu_avg=predict_cpu_avg,
+                        predict_cpu_peak=predict_cpu_peak,
                     )
                     results.append(result)
 
@@ -139,11 +172,16 @@ def run_benchmark(
             "model": result.model,
             "backend": result.backend,
             "sample_size": result.sample_size,
-            **result.parameters,
             "repeat": result.repeat,
+            "load_time": result.load_time,
+            "prepare_time": result.prepare_time,
             "train_time": result.train_time,
             "predict_time": result.predict_time,
             "total_time": result.total_time,
+            "train_cpu_avg": result.train_cpu_avg,
+            "train_cpu_peak": result.train_cpu_peak,
+            "predict_cpu_avg": result.predict_cpu_avg,
+            "predict_cpu_peak": result.predict_cpu_peak,
         }
         rows.append(row)
 

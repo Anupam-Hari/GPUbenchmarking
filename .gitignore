@@ -25,6 +25,10 @@ Thumbs.db
 .nox/
 .coverage
 .coverage.*
+*.odp
+*.pptx
+*.odp#
+*.pptx#
 htmlcov/
 
 # Environment files

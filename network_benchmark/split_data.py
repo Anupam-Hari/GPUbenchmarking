@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+from time import perf_counter
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -14,12 +15,12 @@ from config import RANDOM_STATE
 @dataclass(frozen=True)
 class DataSplit:
     X_train: pd.DataFrame
-    X_val: pd.DataFrame
     X_test: pd.DataFrame
     y_train: pd.Series
-    y_val: pd.Series
     y_test: pd.Series
     feature_columns: list[str]
+    load_time: float
+    prepare_time: float
 
 
 def _get_logger(logger: logging.Logger | None) -> logging.Logger:
@@ -54,22 +55,33 @@ def split_data(
     logger: logging.Logger | None = None,
 ) -> DataSplit:
     logger = _get_logger(logger)
+    load_start = perf_counter()
     df = load_processed_data(processed_csv_path)
+    load_time = perf_counter() - load_start
+
+    prepare_start = perf_counter()
     df = _sample_dataframe(df, sample_size, random_state, logger)
 
     target_column = "attack_type"
     if target_column not in df.columns:
         raise KeyError(f"Expected target column '{target_column}' not found in processed data.")
 
-    feature_columns = [column for column in df.columns if column not in {"is_malicious", target_column}]
+    feature_columns = [
+        column
+        for column in df.columns
+        if column not in {"is_malicious", target_column}
+    ]
+
     X = df[feature_columns]
     y = df[target_column]
 
     stratify_target = y if _can_stratify(y) else None
     if stratify_target is None:
-        logger.warning("Stratified split disabled because the sampled target distribution is too small.")
+        logger.warning(
+            "Stratified split disabled because the sampled target distribution is too small."
+        )
 
-    X_train_val, X_test, y_train_val, y_test = train_test_split(
+    X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
         test_size=0.2,
@@ -77,24 +89,14 @@ def split_data(
         stratify=stratify_target,
     )
 
-    stratify_train_val = y_train_val if _can_stratify(y_train_val) else None
-    if stratify_train_val is None:
-        logger.warning("Validation split disabled stratification because of class counts.")
-
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_train_val,
-        y_train_val,
-        test_size=0.25,
-        random_state=random_state,
-        stratify=stratify_train_val,
-    )
+    prepare_time = perf_counter() - prepare_start
 
     return DataSplit(
         X_train=X_train,
-        X_val=X_val,
         X_test=X_test,
         y_train=y_train,
-        y_val=y_val,
         y_test=y_test,
         feature_columns=feature_columns,
+        load_time=load_time,
+        prepare_time=prepare_time,
     )

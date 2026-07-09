@@ -25,24 +25,24 @@ SUPPORTED_MODELS = (
 
 MODEL_PARAMETERS = {
     "random_forest": {
-        "n_estimators": (100, 200, 500),
-        "max_depth": (5, 10),
+        "n_estimators": (100,),
+        "max_depth": (10,),
     },
     "knn": {
-        "n_neighbors": (3, 5, 10, 20, 50),
+        "n_neighbors": (5,),
     },
     "kmeans": {
-        "n_clusters": (2, 4, 8, 16, 32),
+        "n_clusters": (8,),
     },
     "dbscan": {
-        "eps": [0.3, 0.5,],
-        "min_samples": [5, 10,],
+        "eps": (0.5,),
+        "min_samples": (5,),
     },
 }
 
 SAMPLE_SIZES = (
+    1000,
     10000,
-    25000,
     50000,
     100000,
 )
