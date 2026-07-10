@@ -124,8 +124,8 @@ def run_benchmark(
 
                     prepared_train_features, prepared_train_target = model.prepare_fit_data(split.X_train, split.y_train)
 
-                    cpu_monitor = ProcessCPUMonitor(interval=0.05)
-                    gpu_monitor = GPUMonitor(interval=0.05)
+                    cpu_monitor = ProcessCPUMonitor(interval=0.02)
+                    gpu_monitor = GPUMonitor(interval=0.02)
                     cpu_monitor.start()
                     gpu_monitor.start()
 

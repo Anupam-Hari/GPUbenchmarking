@@ -40,7 +40,6 @@ htmlcov/
 network_benchmark/processed_data/
 network_benchmark/results/
 network_benchmark/datasets/
-analysis/*
 original_notebook/*
 gpuresults/*
 
