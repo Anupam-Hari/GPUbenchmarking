@@ -6,8 +6,10 @@ import logging
 from pathlib import Path
 from typing import Optional
 from datetime import datetime
+from time import perf_counter
 
 from benchmark import run_benchmark
+from split_data import load_processed_data
 from config import (
     BACKENDS,
     DATASETS_DIR,
@@ -91,6 +93,11 @@ def main() -> None:
 		overwrite=args.overwrite_processed,
 		logger=logger,
 	)
+	load_start = perf_counter()
+	df = load_processed_data(processed_csv_path)
+	load_time = perf_counter() - load_start
+
+	logger.info("Dataset loaded in %.2f seconds", load_time)
 
 	all_results = []
 
@@ -102,7 +109,7 @@ def main() -> None:
 		results = run_benchmark(
 			model_name=model_name,
 			backend=args.backend,
-			processed_csv_path=processed_csv_path,
+			df=df,
 			sample_sizes=args.samples,
 			model_parameters=model_parameters,
 			n_repeats=args.repeats,

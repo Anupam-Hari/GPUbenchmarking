@@ -10,7 +10,6 @@ import pandas as pd
 
 from config import BACKENDS, RANDOM_STATE
 from models import get_model
-from network_benchmark import gpu_monitor
 from split_data import split_data
 from cpu_monitor import ProcessCPUMonitor
 from gpu_monitor import GPUMonitor
@@ -23,7 +22,6 @@ class BenchmarkResult:
     sample_size: Optional[int] 
     #parameters: dict
     repeat: int
-    load_time: float
     prepare_time: float
     train_time: float
     predict_time: float
@@ -54,7 +52,7 @@ def _normalize_backends(backend: str) -> list[str]:
 def run_benchmark(
         model_name: str,
         backend: str,
-        processed_csv_path: Path | str,
+        df: pd.DataFrame,
         sample_sizes: Sequence[Optional[int]],  
         model_parameters: dict,
         n_repeats: int,
@@ -108,7 +106,7 @@ def run_benchmark(
 
     results: list[BenchmarkResult] = []
     split_cache = {
-        sample_size: split_data(processed_csv_path, sample_size=sample_size, random_state=random_state, logger=logger)
+        sample_size: split_data(df, sample_size=sample_size, random_state=random_state, logger=logger)
         for sample_size in sample_sizes
     }
     for current_backend in active_backends:
@@ -177,12 +175,10 @@ def run_benchmark(
                         sample_size=sample_size,
                         #parameters=parameters,
                         repeat=repeat,
-                        load_time=split.load_time,
                         prepare_time=split.prepare_time,
                         train_time=train_time,
                         predict_time=predict_time,
                         total_time=(
-                            split.load_time
                             + split.prepare_time
                             + train_time
                             + predict_time
@@ -209,7 +205,6 @@ def run_benchmark(
             "backend": result.backend,
             "sample_size": result.sample_size,
             "repeat": result.repeat,
-            "load_time": result.load_time,
             "prepare_time": result.prepare_time,
             "train_time": result.train_time,
             "predict_time": result.predict_time,

@@ -19,7 +19,6 @@ class DataSplit:
     y_train: pd.Series
     y_test: pd.Series
     feature_columns: list[str]
-    load_time: float
     prepare_time: float
 
 
@@ -49,15 +48,12 @@ def _sample_dataframe(df: pd.DataFrame, sample_size: Optional[int], random_state
 
 
 def split_data(
-    processed_csv_path: Path | str,
+    df: pd.DataFrame,
     sample_size: Optional[int] = None,
     random_state: int = RANDOM_STATE,
     logger: logging.Logger | None = None,
 ) -> DataSplit:
     logger = _get_logger(logger)
-    load_start = perf_counter()
-    df = load_processed_data(processed_csv_path)
-    load_time = perf_counter() - load_start
 
     prepare_start = perf_counter()
     df = _sample_dataframe(df, sample_size, random_state, logger)
@@ -97,6 +93,5 @@ def split_data(
         y_train=y_train,
         y_test=y_test,
         feature_columns=feature_columns,
-        load_time=load_time,
         prepare_time=prepare_time,
     )
