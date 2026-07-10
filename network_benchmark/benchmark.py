@@ -10,8 +10,10 @@ import pandas as pd
 
 from config import BACKENDS, RANDOM_STATE
 from models import get_model
+from network_benchmark import gpu_monitor
 from split_data import split_data
 from cpu_monitor import ProcessCPUMonitor
+from gpu_monitor import GPUMonitor
 
 
 @dataclass(frozen=True)
@@ -30,6 +32,14 @@ class BenchmarkResult:
     train_cpu_peak: float
     predict_cpu_avg: float
     predict_cpu_peak: float
+    train_gpu_avg: float
+    train_gpu_peak: float
+    train_gpu_mem_avg: float
+    train_gpu_mem_peak: float
+    predict_gpu_avg: float
+    predict_gpu_peak: float
+    predict_gpu_mem_avg: float
+    predict_gpu_mem_peak: float
 
 def _get_logger(logger: logging.Logger | None) -> logging.Logger:
     return logger if logger is not None else logging.getLogger(__name__)
@@ -116,33 +126,50 @@ def run_benchmark(
 
                     prepared_train_features, prepared_train_target = model.prepare_fit_data(split.X_train, split.y_train)
 
-                    monitor = ProcessCPUMonitor(interval=0.05)
-                    monitor.start()
+                    cpu_monitor = ProcessCPUMonitor(interval=0.05)
+                    gpu_monitor = GPUMonitor(interval=0.05)
+                    cpu_monitor.start()
+                    gpu_monitor.start()
 
                     train_start = perf_counter()
                     model.fit(prepared_train_features, prepared_train_target)
                     train_time = perf_counter() - train_start
 
-                    monitor.stop()
-                    train_cpu_avg = monitor.average
-                    train_cpu_peak = monitor.peak
+                    cpu_monitor.stop()
+                    gpu_monitor.stop()
+                    train_cpu_avg = cpu_monitor.average
+                    train_cpu_peak = cpu_monitor.peak
+                    train_gpu_avg = gpu_monitor.average_gpu_util
+                    train_gpu_peak = gpu_monitor.peak_gpu_util
+                    train_gpu_mem_avg = gpu_monitor.average_memory
+                    train_gpu_mem_peak = gpu_monitor.peak_memory
 
                     if model_name == "dbscan":
                         predict_time = 0.0
                         predict_time = 0.0
                         predict_cpu_avg = 0.0
                         predict_cpu_peak = 0.0
+                        predict_gpu_avg = 0.0
+                        predict_gpu_peak = 0.0
+                        predict_gpu_mem_avg = 0.0
+                        predict_gpu_mem_peak = 0.0
                     else:
                         prepared_test_features = model.prepare_predict_data(split.X_test)
 
-                        monitor.start()
+                        cpu_monitor.start()
+                        gpu_monitor.start()
                         predict_start = perf_counter()
                         model.predict_raw(prepared_test_features)
                         predict_time = perf_counter() - predict_start
 
-                        monitor.stop()
-                        predict_cpu_avg = monitor.average
-                        predict_cpu_peak = monitor.peak
+                        cpu_monitor.stop()
+                        gpu_monitor.stop()
+                        predict_cpu_avg = cpu_monitor.average
+                        predict_cpu_peak = cpu_monitor.peak
+                        predict_gpu_avg = gpu_monitor.average_gpu_util
+                        predict_gpu_peak = gpu_monitor.peak_gpu_util
+                        predict_gpu_mem_avg = gpu_monitor.average_memory
+                        predict_gpu_mem_peak = gpu_monitor.peak_memory
 
                     result = BenchmarkResult(
                         model=model_name,
@@ -164,6 +191,14 @@ def run_benchmark(
                         train_cpu_peak=train_cpu_peak,
                         predict_cpu_avg=predict_cpu_avg,
                         predict_cpu_peak=predict_cpu_peak,
+                        train_gpu_avg=train_gpu_avg,
+                        train_gpu_peak=train_gpu_peak,
+                        train_gpu_mem_avg=train_gpu_mem_avg,
+                        train_gpu_mem_peak=train_gpu_mem_peak,
+                        predict_gpu_avg=predict_gpu_avg,
+                        predict_gpu_peak=predict_gpu_peak,
+                        predict_gpu_mem_avg=predict_gpu_mem_avg,
+                        predict_gpu_mem_peak=predict_gpu_mem_peak,
                     )
                     results.append(result)
 
@@ -183,6 +218,14 @@ def run_benchmark(
             "train_cpu_peak": result.train_cpu_peak,
             "predict_cpu_avg": result.predict_cpu_avg,
             "predict_cpu_peak": result.predict_cpu_peak,
+            "train_gpu_avg": result.train_gpu_avg,
+            "train_gpu_peak": result.train_gpu_peak,
+            "train_gpu_mem_avg": result.train_gpu_mem_avg,
+            "train_gpu_mem_peak": result.train_gpu_mem_peak,
+            "predict_gpu_avg": result.predict_gpu_avg,
+            "predict_gpu_peak": result.predict_gpu_peak,
+            "predict_gpu_mem_avg": result.predict_gpu_mem_avg,
+            "predict_gpu_mem_peak": result.predict_gpu_mem_peak,
         }
         rows.append(row)
 

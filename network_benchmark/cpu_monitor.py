@@ -29,7 +29,8 @@ class ProcessCPUMonitor:
 
     def stop(self):
         self._running = False
-        self._thread.join()
+        if self._thread is not None:
+           self._thread.join()
 
     @property
     def average(self):
