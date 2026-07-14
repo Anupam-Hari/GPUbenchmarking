@@ -133,8 +133,10 @@ def plot_cpu_utilization(summary, output_dir: Path):
         rows=2,
         cols=2,
         subplot_titles=titles,
-        shared_xaxes=True,
-        shared_yaxes=True,
+        shared_xaxes=False,
+        shared_yaxes=False,
+        horizontal_spacing=0.18,   # default is ~0.08
+        vertical_spacing=0.2,
     )
 
     positions = [
@@ -154,7 +156,7 @@ def plot_cpu_utilization(summary, output_dir: Path):
         fig.add_trace(
             go.Scatter(
                 x=cpu.sample_size,
-                y=cpu.train_cpu_avg,
+                y=cpu.train_cpu_avg/100,
                 mode="lines+markers",
                 name="CPU Backend",
                 legendgroup="cpu",
@@ -169,7 +171,7 @@ def plot_cpu_utilization(summary, output_dir: Path):
         fig.add_trace(
             go.Scatter(
                 x=gpu.sample_size,
-                y=gpu.train_cpu_avg,
+                y=gpu.train_cpu_avg/100,
                 mode="lines+markers",
                 name="GPU Backend",
                 legendgroup="gpu",
@@ -184,12 +186,17 @@ def plot_cpu_utilization(summary, output_dir: Path):
         fig.update_xaxes(
             type="log",
             title_text="Sample Size",
+            title_font=dict(size=13),
+            tickfont=dict(size=10),
             row=row,
             col=col,
         )
 
         fig.update_yaxes(
-            title_text="CPU Utilization (%)",
+            title_text="Logical CPU Cores Utilized",
+            tickformat=".2f",
+            title_font=dict(size=13),
+            tickfont=dict(size=10),
             row=row,
             col=col,
         )
@@ -199,8 +206,10 @@ def plot_cpu_utilization(summary, output_dir: Path):
         template="plotly_white",
         width=1200,
         height=900,
-        font=dict(size=16),
+        font=dict(size=13),
     )
+    for annotation in fig.layout.annotations:
+        annotation.font.size = 13
 
     _save_figure(fig, output_dir, "cpu_utilization")
 
@@ -233,8 +242,10 @@ def plot_gpu_utilization(summary, output_dir: Path):
         rows=2,
         cols=2,
         subplot_titles=titles,
-        shared_xaxes=True,
-        shared_yaxes=True,
+        shared_xaxes=False,
+        shared_yaxes=False,
+        horizontal_spacing=0.18,   # default is ~0.08
+        vertical_spacing=0.2,
     )
 
     positions = [
@@ -267,12 +278,16 @@ def plot_gpu_utilization(summary, output_dir: Path):
         fig.update_xaxes(
             type="log",
             title_text="Sample Size",
+            title_font=dict(size=13),
+            tickfont=dict(size=10),
             row=row,
             col=col,
         )
 
         fig.update_yaxes(
             title_text="GPU Utilization (%)",
+            title_font=dict(size=13),
+            tickfont=dict(size=10),
             range=[0, 100],
             row=row,
             col=col,
@@ -283,7 +298,8 @@ def plot_gpu_utilization(summary, output_dir: Path):
         template="plotly_white",
         width=1200,
         height=900,
-        font=dict(size=16),
+        font=dict(size=13),
+
     )
 
     _save_figure(fig, output_dir, "gpu_utilization")
