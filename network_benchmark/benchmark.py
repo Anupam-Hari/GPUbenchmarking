@@ -122,25 +122,27 @@ def run_benchmark(
                         random_state=random_state,
                     )
 
+                    print(model.estimator.get_params())
+
                     prepared_train_features, prepared_train_target = model.prepare_fit_data(split.X_train, split.y_train)
 
                     cpu_monitor = ProcessCPUMonitor(interval=0.02)
-                    gpu_monitor = GPUMonitor(interval=0.02)
+                    #gpu_monitor = GPUMonitor(interval=0.02)
                     cpu_monitor.start()
-                    gpu_monitor.start()
+                    #gpu_monitor.start()
 
                     train_start = perf_counter()
                     model.fit(prepared_train_features, prepared_train_target)
                     train_time = perf_counter() - train_start
 
                     cpu_monitor.stop()
-                    gpu_monitor.stop()
+                    #gpu_monitor.stop()
                     train_cpu_avg = cpu_monitor.average
                     train_cpu_peak = cpu_monitor.peak
-                    train_gpu_avg = gpu_monitor.average_gpu_util
-                    train_gpu_peak = gpu_monitor.peak_gpu_util
-                    train_gpu_mem_avg = gpu_monitor.average_memory
-                    train_gpu_mem_peak = gpu_monitor.peak_memory
+                    # train_gpu_avg = gpu_monitor.average_gpu_util
+                    # train_gpu_peak = gpu_monitor.peak_gpu_util
+                    # train_gpu_mem_avg = gpu_monitor.average_memory
+                    # train_gpu_mem_peak = gpu_monitor.peak_memory
 
                     if model_name == "dbscan":
                         predict_time = 0.0
@@ -155,19 +157,19 @@ def run_benchmark(
                         prepared_test_features = model.prepare_predict_data(split.X_test)
 
                         cpu_monitor.start()
-                        gpu_monitor.start()
+                        #gpu_monitor.start()
                         predict_start = perf_counter()
                         model.predict_raw(prepared_test_features)
                         predict_time = perf_counter() - predict_start
 
                         cpu_monitor.stop()
-                        gpu_monitor.stop()
+                        #gpu_monitor.stop()
                         predict_cpu_avg = cpu_monitor.average
                         predict_cpu_peak = cpu_monitor.peak
-                        predict_gpu_avg = gpu_monitor.average_gpu_util
-                        predict_gpu_peak = gpu_monitor.peak_gpu_util
-                        predict_gpu_mem_avg = gpu_monitor.average_memory
-                        predict_gpu_mem_peak = gpu_monitor.peak_memory
+                        # predict_gpu_avg = gpu_monitor.average_gpu_util
+                        # predict_gpu_peak = gpu_monitor.peak_gpu_util
+                        # predict_gpu_mem_avg = gpu_monitor.average_memory
+                        # predict_gpu_mem_peak = gpu_monitor.peak_memory
 
                     result = BenchmarkResult(
                         model=model_name,
@@ -187,14 +189,14 @@ def run_benchmark(
                         train_cpu_peak=train_cpu_peak,
                         predict_cpu_avg=predict_cpu_avg,
                         predict_cpu_peak=predict_cpu_peak,
-                        train_gpu_avg=train_gpu_avg,
-                        train_gpu_peak=train_gpu_peak,
-                        train_gpu_mem_avg=train_gpu_mem_avg,
-                        train_gpu_mem_peak=train_gpu_mem_peak,
-                        predict_gpu_avg=predict_gpu_avg,
-                        predict_gpu_peak=predict_gpu_peak,
-                        predict_gpu_mem_avg=predict_gpu_mem_avg,
-                        predict_gpu_mem_peak=predict_gpu_mem_peak,
+                        train_gpu_avg=0,
+                        train_gpu_peak=0,
+                        train_gpu_mem_avg=0,
+                        train_gpu_mem_peak=0,
+                        predict_gpu_avg=0,
+                        predict_gpu_peak=0,
+                        predict_gpu_mem_avg=0,
+                        predict_gpu_mem_peak=0,
                     )
                     results.append(result)
 

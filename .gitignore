@@ -42,6 +42,9 @@ network_benchmark/results/
 network_benchmark/datasets/
 original_notebook/*
 gpuresults/*
+test_cuml/*
+goresults/*
+python-go-compare/*
 
 # Logs
 *.log

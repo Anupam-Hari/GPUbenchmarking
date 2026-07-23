@@ -93,11 +93,11 @@ def main() -> None:
 		overwrite=args.overwrite_processed,
 		logger=logger,
 	)
-	load_start = perf_counter()
+	#load_start = perf_counter()
 	df = load_processed_data(processed_csv_path)
-	load_time = perf_counter() - load_start
+	#load_time = perf_counter() - load_start
 
-	logger.info("Dataset loaded in %.2f seconds", load_time)
+	#logger.info("Dataset loaded in %.2f seconds", load_time)
 
 	all_results = []
 
@@ -121,17 +121,17 @@ def main() -> None:
 
 	raw_results = pd.concat(all_results, ignore_index=True)
 
-	summary = build_summary(raw_results)
-	raw_results.to_csv(raw_results_path, index=False)
-	summary.to_csv(summary_csv_path, index=False)
+	# summary = build_summary(raw_results)
+	# raw_results.to_csv(raw_results_path, index=False)
+	# summary.to_csv(summary_csv_path, index=False)
 
-	summary_text = format_summary_report(raw_results)
-	summary_text_path.write_text(summary_text, encoding="utf-8")
+	# summary_text = format_summary_report(raw_results)
+	# summary_text_path.write_text(summary_text, encoding="utf-8")
 
-	logger.info("Run directory: %s", run_dir)
-	logger.info("Raw results saved to %s", raw_results_path)
-	logger.info("Summary CSV saved to %s", summary_csv_path)
-	logger.info("Summary text saved to %s", summary_text_path)
+	# logger.info("Run directory: %s", run_dir)
+	# logger.info("Raw results saved to %s", raw_results_path)
+	# logger.info("Summary CSV saved to %s", summary_csv_path)
+	# logger.info("Summary text saved to %s", summary_text_path)
 
 
 if __name__ == "__main__":

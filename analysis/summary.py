@@ -3,10 +3,17 @@ from pathlib import Path
 import pandas as pd
 
 
+TRAIN_RATIO = 0.8
+TEST_RATIO = 0.2
+
+
 def generate_summary(raw_results_path: Path) -> pd.DataFrame:
     """
     Create a data_summary.csv by averaging all repeats for each
     (model, backend, sample_size).
+
+    Also stores the derived TrainRows and TestRows based on the
+    configured train/test split.
     """
 
     summary_path = raw_results_path.parent / "data_summary.csv"
@@ -15,6 +22,10 @@ def generate_summary(raw_results_path: Path) -> pd.DataFrame:
         return pd.read_csv(summary_path)
 
     df = pd.read_csv(raw_results_path)
+
+    # Add train/test row counts
+    df["TrainRows"] = (df["sample_size"] * TRAIN_RATIO).round().astype(int)
+    df["TestRows"] = (df["sample_size"] * TEST_RATIO).round().astype(int)
 
     group_columns = [
         "model",
@@ -35,10 +46,13 @@ def generate_summary(raw_results_path: Path) -> pd.DataFrame:
         .mean()
     )
 
-    output_path = raw_results_path.parent / "data_summary.csv"
-    summary.to_csv(output_path, index=False)
+    # Convert row counts back to integers
+    summary["TrainRows"] = summary["TrainRows"].round().astype(int)
+    summary["TestRows"] = summary["TestRows"].round().astype(int)
 
-    print(f"Created {output_path}")
+    summary.to_csv(summary_path, index=False)
+
+    print(f"Created {summary_path}")
 
     return summary
 

@@ -13,7 +13,7 @@ from plots import (
 def main():
 
     # Change this to your benchmark results directory
-    root = Path("gpuresults/random_forest_knn_kmeans_dbscan_10072026_110129")
+    root = Path("gpuresults/random_forest_knn_kmeans_23072026_124328")
 
     # Generate data_summary.csv inside every benchmark folder
     generate_all_summaries(root)
